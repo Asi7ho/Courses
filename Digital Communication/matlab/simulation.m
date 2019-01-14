@@ -16,7 +16,7 @@ nr_guard_bits = 10;                 % Size of guard sequence (in nr bits)
                                     % which contain the training and data symbols.
 nr_data_bits = 1000;                % Size of each data sequence (in nr bits)
 nr_training_bits = 100;             % Size of training sequence (in nr bits)
-nr_blocks = 50;                     % The number of blocks to simulate
+nr_blocks = 200;                    % The number of blocks to simulate
 Q = 8;                              % Number of samples per symbol in baseband
 
 % Define the pulse-shape used in the transmitter. 
@@ -120,4 +120,3 @@ set(gca, 'YScale', 'log')
 xlabel('Eb/N0 (dB)')
 ylabel('BER (dB)')
 legend('BER simulation',  'BER theory')
-
