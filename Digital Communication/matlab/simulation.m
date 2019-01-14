@@ -84,14 +84,14 @@ for snr_point = 1:length(EbN0_db)
     % function used for syncing)! 
     t_start=1+Q*nr_guard_bits/2;
     t_end=t_start+50;
-    t_samp = sync(mf, b_train, Q, t_start, t_end);
+    t_samp = t_start + length(mf_pulse_shape) - 1;
     
     % Down sampling. t_samp is the first sample, the remaining samples are all
     % separated by a factor of Q. Only training+data samples are kept.
     r = mf(t_samp:Q:t_samp+Q*(nr_training_bits+nr_data_bits)/2-1);
 
     % Phase estimation and correction.
-    phihat = phase_estimation(r, b_train);
+    phihat = 0;
     r = r * exp(-1i*phihat);
         
     % Make decisions. Note that dhat will include training sequence bits
