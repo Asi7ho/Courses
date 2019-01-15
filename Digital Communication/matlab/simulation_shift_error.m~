@@ -9,6 +9,9 @@
 clear all 
 close all
 
+length_training = 0:100:1000;
+length_training(1) = 2;
+
 % Initialization
 EbN0_db = 0:10;                     % Eb/N0 values to simulate (in dB)
 nr_bits_per_symbol = 2;             % Corresponds to k in the report
@@ -33,6 +36,8 @@ mf_pulse_shape = fliplr(pulse_shape);
 
 time_shift = 0:9;
 snr_point = 10;
+
+for j = 1:length(len)
 
 for i = 1:length(time_shift)
     % Loop over different values of Eb/No.
@@ -114,7 +119,7 @@ for i = 1:length(time_shift)
         % Next block.
     end
     
-    BER(i) = nr_errors / nr_data_bits / nr_blocks;
+    BER(i, j) = nr_errors / nr_data_bits / nr_blocks;
 end
 
 plot(time_shift, BER, 'LineWidth', 2);
@@ -154,7 +159,7 @@ pulse_shape = ones(1, Q);
 % Matched filter impulse response.
 mf_pulse_shape = fliplr(pulse_shape);
 
-phase_shift = 0:0.1:pi;
+phase_shift = 0:0.1:2*pi;
 snr_point = 10;
 
 for i = 1:length(phase_shift)
@@ -213,7 +218,7 @@ for i = 1:length(phase_shift)
         % function used for syncing)!
         t_start=1+Q*nr_guard_bits/2;
         t_end=t_start+50;
-        t_samp = t_start + length(mf_pulse_shape) - 1;
+        t_samp = sync(mf, b_train, Q, t_start, t_end);
         
         % Down sampling. t_samp is the first sample, the remaining samples are all
         % separated by a factor of Q. Only training+data samples are kept.

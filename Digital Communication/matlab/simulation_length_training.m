@@ -9,8 +9,11 @@
 clear all 
 close all
 
+length_training = 0:2:100;
+length_training(1) = 2;
+
 % Initialization
-EbN0_db = 0:10;                     % Eb/N0 values to simulate (in dB)
+EbN0_db = 0:20;                     % Eb/N0 values to simulate (in dB)
 nr_bits_per_symbol = 2;             % Corresponds to k in the report
 nr_guard_bits = 10;                 % Size of guard sequence (in nr bits)
                                     % Guard bits are appended to transmitted bits so
@@ -30,11 +33,12 @@ pulse_shape = ones(1, Q);
 
 % Matched filter impulse response.
 mf_pulse_shape = fliplr(pulse_shape);
+snr_point = 1;
 
-time_shift = 0:9;
-snr_point = 10;
-
-for i = 1:length(time_shift)
+for i = 1:length(length_training)
+    
+    nr_training_bits = length_training(i);
+    
     % Loop over different values of Eb/No.
     nr_errors = 0;   % Error counter
     
@@ -89,40 +93,19 @@ for i = 1:length(time_shift)
         % function used for syncing)!
         t_start=1+Q*nr_guard_bits/2;
         t_end=t_start+50;
-        t_samp = sync(mf, b_train, Q, t_start, t_end) + time_shift(i);
+        t_samp = sync(mf, b_train, Q, t_start, t_end);
         
-        % Down sampling. t_samp is the first sample, the remaining samples are all
-        % separated by a factor of Q. Only training+data samples are kept.
-        r = mf(t_samp:Q:t_samp+Q*(nr_training_bits+nr_data_bits)/2-1);
-        
-        % Phase estimation and correction.
-        %phihat = phase_estimation(r, b_train);
-        phihat = 0;
-        r = r * exp(-1i*phihat);
-        
-        % Make decisions. Note that dhat will include training sequence bits
-        % as well.
-        bhat = detect(r);
-        
-        % Count errors. Note that only the data bits and not the training bits
-        % are included in the comparison. The last data bits are missing as well
-        % since the whole impulse response due to the last symbol is not
-        % included in the simulation program above.
-        temp=bhat(1+nr_training_bits:nr_training_bits+nr_data_bits) ~= b_data;
-        nr_errors = nr_errors + sum(temp);
-        
-        % Next block.
+        ErrorT(i) = t_samp - (t_start + length(mf_pulse_shape) - 1);
     end
-    
-    BER(i) = nr_errors / nr_data_bits / nr_blocks;
+
 end
 
-plot(time_shift, BER, 'LineWidth', 2);
-set(gca, 'YScale', 'log')
-xlabel('Time shift')
-ylabel('BER (dB)')
+plot(length_training, ErrorT, 'LineWidth', 2); hold on;
+xlabel('Length of the training Sequence')
+ylabel('Error sync')
 
-%% Phase 
+
+%% Phase
 
 % Skeleton code for simulation chain
 
@@ -130,16 +113,20 @@ ylabel('BER (dB)')
 %   2000-06-28  written /Stefan Parkvall
 %   2001-10-22  modified /George Jongren
 
-clear
+clear all 
+close all
+
+length_training = 0:2:100;
+length_training(1) = 2;
 
 % Initialization
-EbN0_db = 0:10;                     % Eb/N0 values to simulate (in dB)
+EbN0_db = 0:20;                     % Eb/N0 values to simulate (in dB)
 nr_bits_per_symbol = 2;             % Corresponds to k in the report
 nr_guard_bits = 10;                 % Size of guard sequence (in nr bits)
                                     % Guard bits are appended to transmitted bits so
                                     % that the transients in the beginning and end
                                     % of received sequence do not affect the samples
-                                       % which contain the training and data symbols.
+                                    % which contain the training and data symbols.
 nr_data_bits = 1000;                % Size of each data sequence (in nr bits)
 nr_training_bits = 100;             % Size of training sequence (in nr bits)
 nr_blocks = 300;                    % The number of blocks to simulate
@@ -153,11 +140,11 @@ pulse_shape = ones(1, Q);
 
 % Matched filter impulse response.
 mf_pulse_shape = fliplr(pulse_shape);
+snr_point = 1;
 
-phase_shift = 0:0.1:pi;
-snr_point = 10;
-
-for i = 1:length(phase_shift)
+for i = 1:length(length_training)
+    
+    nr_training_bits = length_training(i);
     
     % Loop over different values of Eb/No.
     nr_errors = 0;   % Error counter
@@ -221,29 +208,14 @@ for i = 1:length(phase_shift)
         
         % Phase estimation and correction.
         %phihat = phase_estimation(r, b_train);
-        phihat = phase_shift(i);
+        phihat = phase_estimation(r, b_train);
         r = r * exp(-1i*phihat);
         
-        % Make decisions. Note that dhat will include training sequence bits
-        % as well.
-        bhat = detect(r);
-        
-        % Count errors. Note that only the data bits and not the training bits
-        % are included in the comparison. The last data bits are missing as well
-        % since the whole impulse response due to the last symbol is not
-        % included in the simulation program above.
-        temp=bhat(1+nr_training_bits:nr_training_bits+nr_data_bits) ~= b_data;
-        nr_errors = nr_errors + sum(temp);
-        
-        % Next block.
+        ErrorPhi(i) = phihat;
     end
-    BER(i) = nr_errors / nr_data_bits / nr_blocks;
+
 end
 
-% Compute the BER.
-%BER = nr_errors / nr_data_bits / nr_blocks;
-
-plot(phase_shift, BER, 'LineWidth', 2);
-set(gca, 'YScale', 'log')
-xlabel('Phase shift')
-ylabel('BER (dB)')
+plot(length_training, ErrorPhi, 'LineWidth', 2);
+xlabel('Length of the training sequence')
+ylabel('Error phase')

@@ -20,7 +20,7 @@ r_train = r(1:N);
 
 min = inf;
 
-for phi = 0:0.01:2*pi
+for phi = -pi:0.01:pi
     r_phi = r_train*exp(-1i*phi);
     rau_phi = norm(r_phi - QPSK_train);
     if rau_phi < min

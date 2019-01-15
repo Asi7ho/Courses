@@ -9,8 +9,11 @@
 clear all 
 close all
 
+length_training = 0:10:100;
+length_training(1) = 2;
+
 % Initialization
-EbN0_db = 0:10;                     % Eb/N0 values to simulate (in dB)
+EbN0_db = 0:20;                     % Eb/N0 values to simulate (in dB)
 nr_bits_per_symbol = 2;             % Corresponds to k in the report
 nr_guard_bits = 10;                 % Size of guard sequence (in nr bits)
                                     % Guard bits are appended to transmitted bits so
@@ -30,11 +33,12 @@ pulse_shape = ones(1, Q);
 
 % Matched filter impulse response.
 mf_pulse_shape = fliplr(pulse_shape);
+snr_point = 1;
 
-time_shift = 0:9;
-snr_point = 10;
-
-for i = 1:length(time_shift)
+for i = 1:length(length_training)
+    
+    nr_training_bits = length_training(i);
+    
     % Loop over different values of Eb/No.
     nr_errors = 0;   % Error counter
     
@@ -89,7 +93,9 @@ for i = 1:length(time_shift)
         % function used for syncing)!
         t_start=1+Q*nr_guard_bits/2;
         t_end=t_start+50;
-        t_samp = sync(mf, b_train, Q, t_start, t_end) + time_shift(i);
+        t_samp = sync(mf, b_train, Q, t_start, t_end);
+        
+        ErrorT(i) = t_samp 
         
         % Down sampling. t_samp is the first sample, the remaining samples are all
         % separated by a factor of Q. Only training+data samples are kept.
@@ -117,12 +123,14 @@ for i = 1:length(time_shift)
     BER(i) = nr_errors / nr_data_bits / nr_blocks;
 end
 
-plot(time_shift, BER, 'LineWidth', 2);
+
+plot(length_training, ErrorT, 'LineWidth', 2); hold on;
 set(gca, 'YScale', 'log')
-xlabel('Time shift')
+xlabel('Length of the training Sequence')
 ylabel('BER (dB)')
 
-%% Phase 
+
+%% Phase
 
 % Skeleton code for simulation chain
 
@@ -130,16 +138,20 @@ ylabel('BER (dB)')
 %   2000-06-28  written /Stefan Parkvall
 %   2001-10-22  modified /George Jongren
 
-clear
+clear all 
+close all
+
+length_training = 2:2:20;
+%length_training(1) = 2;
 
 % Initialization
-EbN0_db = 0:10;                     % Eb/N0 values to simulate (in dB)
+EbN0_db = 0:20;                     % Eb/N0 values to simulate (in dB)
 nr_bits_per_symbol = 2;             % Corresponds to k in the report
 nr_guard_bits = 10;                 % Size of guard sequence (in nr bits)
                                     % Guard bits are appended to transmitted bits so
                                     % that the transients in the beginning and end
                                     % of received sequence do not affect the samples
-                                       % which contain the training and data symbols.
+                                    % which contain the training and data symbols.
 nr_data_bits = 1000;                % Size of each data sequence (in nr bits)
 nr_training_bits = 100;             % Size of training sequence (in nr bits)
 nr_blocks = 300;                    % The number of blocks to simulate
@@ -157,8 +169,11 @@ mf_pulse_shape = fliplr(pulse_shape);
 phase_shift = 0:0.1:pi;
 snr_point = 10;
 
-for i = 1:length(phase_shift)
+for j = 1:length(length_training)
     
+    nr_training_bits = length_training(j);
+
+for i = 1:length(phase_shift)
     % Loop over different values of Eb/No.
     nr_errors = 0;   % Error counter
     
@@ -237,13 +252,14 @@ for i = 1:length(phase_shift)
         
         % Next block.
     end
-    BER(i) = nr_errors / nr_data_bits / nr_blocks;
+    
+    BER(i, j) = nr_errors / nr_data_bits / nr_blocks;
+end
 end
 
-% Compute the BER.
-%BER = nr_errors / nr_data_bits / nr_blocks;
-
-plot(phase_shift, BER, 'LineWidth', 2);
+for i = 1:length(length_training)
+plot(phase_shift, BER(:, i), 'LineWidth', 2); hold on;
 set(gca, 'YScale', 'log')
-xlabel('Phase shift')
+xlabel('Time shift')
 ylabel('BER (dB)')
+end
