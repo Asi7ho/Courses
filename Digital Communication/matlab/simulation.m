@@ -120,3 +120,9 @@ set(gca, 'YScale', 'log')
 xlabel('Eb/N0 (dB)')
 ylabel('BER (dB)')
 legend('BER simulation',  'BER theory')
+
+%% Eye diagram
+
+eyediagram(tx, 64)
+
+eyediagram(rx, 64)
