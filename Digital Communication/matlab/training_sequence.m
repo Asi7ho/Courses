@@ -15,4 +15,10 @@ function b = training_sequence(nr_training_bits)
 %   2000-09-28  written /Stefan Parkvall
 %   2001-10-21  modified / George Jöngren
 
-b = (rand(1, nr_training_bits) > .5);
+%b = (rand(1, nr_training_bits) > .5);
+
+b = ones(1, nr_training_bits);
+b = qmf(b);
+%b(1) = 1;
+
+end

@@ -16,7 +16,7 @@ nr_guard_bits = 10;                 % Size of guard sequence (in nr bits)
                                     % which contain the training and data symbols.
 nr_data_bits = 1000;                % Size of each data sequence (in nr bits)
 nr_training_bits = 100;             % Size of training sequence (in nr bits)
-nr_blocks = 50;                     % The number of blocks to simulate
+nr_blocks = 300;                    % The number of blocks to simulate
 Q = 8;                              % Number of samples per symbol in baseband
 
 % Define the pulse-shape used in the transmitter. 
@@ -31,6 +31,7 @@ mf_pulse_shape = fliplr(pulse_shape);
 
 % Loop over different values of Eb/No.
 nr_errors = zeros(1, length(EbN0_db));   % Error counter
+%dnr_errors = zeros(1, length(EbN0_db));
 for snr_point = 1:length(EbN0_db)
   
   % Loop over several blocks to get sufficient statistics.
@@ -53,10 +54,12 @@ for snr_point = 1:length(EbN0_db)
     b = [b_guard b_train b_data b_guard];
     
     % Map bits into complex-valued QPSK symbols.
-    d = qpsk(b);
+    d = dqpsk(b);
+    %dQPSK = dqpsk(b);
 
     % Upsample the signal, apply pulse shaping.
     tx = upfirdn(d, pulse_shape, Q, 1);
+    %dtx = upfirdn(dQPSK, pulse_shape, Q, 1);
 
     %%%
     %%% AWGN Channel
@@ -70,6 +73,7 @@ for snr_point = 1:length(EbN0_db)
 
     % Received signal.
     rx = tx + n;
+    %drx = dtx + n;
 
     %%%
     %%% Receiver
@@ -77,6 +81,7 @@ for snr_point = 1:length(EbN0_db)
     
     % Matched filtering.
     mf=conv(mf_pulse_shape,rx);
+    %dmf=conv(mf_pulse_shape,drx);
     
     % Synchronization. The position and size of the search window
     % is here set arbitrarily. Note that you might need to change these
@@ -84,26 +89,33 @@ for snr_point = 1:length(EbN0_db)
     % function used for syncing)! 
     t_start=1+Q*nr_guard_bits/2;
     t_end=t_start+50;
-    t_samp = t_start + length(mf_pulse_shape) - 1;
+    t_samp = sync(mf, b_train, Q, t_start, t_end);
+    %dt_samp = sync(dmf, b_train, Q, t_start, t_end);
     
     % Down sampling. t_samp is the first sample, the remaining samples are all
     % separated by a factor of Q. Only training+data samples are kept.
     r = mf(t_samp:Q:t_samp+Q*(nr_training_bits+nr_data_bits)/2-1);
+    %dr = dmf(dt_samp:Q:dt_samp+Q*(nr_training_bits+nr_data_bits)/2-1);
 
     % Phase estimation and correction.
+    %phihat = phase_estimation(r, b_train);
     phihat = 0;
     r = r * exp(-1i*phihat);
         
     % Make decisions. Note that dhat will include training sequence bits
     % as well.
-    bhat = detect(r);
+    bhat = detect_dqpsk(r);
+    %dbhat = detect_dqpsk(dr);
     
     % Count errors. Note that only the data bits and not the training bits
     % are included in the comparison. The last data bits are missing as well
     % since the whole impulse response due to the last symbol is not
     % included in the simulation program above.
     temp=bhat(1+nr_training_bits:nr_training_bits+nr_data_bits) ~= b_data;
+    %dtemp=dbhat(1+nr_training_bits:nr_training_bits+nr_data_bits) ~= b_data;
+    
     nr_errors(snr_point) = nr_errors(snr_point) + sum(temp);
+    %dnr_errors(snr_point) = dnr_errors(snr_point) + sum(dtemp);
 
     % Next block.
   end
@@ -113,18 +125,11 @@ end
 
 % Compute the BER. 
 BER = nr_errors / nr_data_bits / nr_blocks;
+%dBER = dnr_errors / nr_data_bits / nr_blocks;
 
 plot(EbN0_db,BER, 'LineWidth', 2); hold on;
-plot(EbN0_db,1-normcdf(sqrt(2*10.^(EbN0_db/10))), 'LineWidth', 2);
+%plot(EbN0_db,dBER, 'LineWidth', 2);
 set(gca, 'YScale', 'log')
 xlabel('Eb/N0 (dB)')
 ylabel('BER (dB)')
-legend('BER simulation',  'BER theory')
-
-%% Eye diagram
-
-eyediagram(rx, 64)
-
-y = multipath(tx, t_start + length(mf_pulse_shape) - 1);
-y = y + n;
-eyediagram(y, 64)
+%legend('QPSK',  'DQPSK')

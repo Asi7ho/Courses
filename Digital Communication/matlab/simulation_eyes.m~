@@ -70,12 +70,14 @@ for snr_point = 1:length(EbN0_db)
 
     % Received signal.
     rx = tx + n;
+    y = multipath(tx, length(mf_pulse_shape) - 1) + n;
 
     %%%
     %%% Receiver
     %%%
     
     % Matched filtering.
+    mf=conv(mf_pulse_shape,rx);
     mf=conv(mf_pulse_shape,rx);
     
     % Synchronization. The position and size of the search window
@@ -84,14 +86,14 @@ for snr_point = 1:length(EbN0_db)
     % function used for syncing)! 
     t_start=1+Q*nr_guard_bits/2;
     t_end=t_start+50;
-    t_samp = t_start + length(mf_pulse_shape) - 1;
+    t_samp = sync(mf, b_train, Q, t_start, t_end);
     
     % Down sampling. t_samp is the first sample, the remaining samples are all
     % separated by a factor of Q. Only training+data samples are kept.
     r = mf(t_samp:Q:t_samp+Q*(nr_training_bits+nr_data_bits)/2-1);
 
     % Phase estimation and correction.
-    phihat = 0;
+    phihat = phase_estimation(r, b_train);
     r = r * exp(-1i*phihat);
         
     % Make decisions. Note that dhat will include training sequence bits
@@ -125,6 +127,4 @@ legend('BER simulation',  'BER theory')
 
 eyediagram(rx, 64)
 
-y = multipath(tx, t_start + length(mf_pulse_shape) - 1);
-y = y + n;
 eyediagram(y, 64)

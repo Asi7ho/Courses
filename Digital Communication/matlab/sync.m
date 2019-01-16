@@ -27,7 +27,7 @@ for i=1:T
    cross_corr(i) = sum(conj(mf(t_start+(i-1):Q:t_start+(i-1)+Q*N-1)).*QPSK_train);
 end
 
-%plot(abs(cross_corr))
+plot(abs(cross_corr))
 
 [~, t_samp] = max(abs(cross_corr));
 t_samp = t_start + t_samp - 1;
