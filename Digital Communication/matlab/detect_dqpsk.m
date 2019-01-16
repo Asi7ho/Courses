@@ -1,12 +1,12 @@
 function bhat = detect_dqpsk(r)
 
-angle(1) = r(1);
+ph(1) = r(1);
 
 for i = 2:length(r)
-    angle(i) = r(i)/angle(i-1);
+    ph(i) = r(i)/conj(ph(i-1));
 end
 
-bhat = detect(angle);
+bhat = detect(ph);
 
     
 end

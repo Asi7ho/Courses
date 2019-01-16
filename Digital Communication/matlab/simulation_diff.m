@@ -16,7 +16,7 @@ nr_guard_bits = 10;                 % Size of guard sequence (in nr bits)
                                     % which contain the training and data symbols.
 nr_data_bits = 1000;                % Size of each data sequence (in nr bits)
 nr_training_bits = 100;             % Size of training sequence (in nr bits)
-nr_blocks = 300;                    % The number of blocks to simulate
+nr_blocks = 50;                     % The number of blocks to simulate
 Q = 8;                              % Number of samples per symbol in baseband
 
 % Define the pulse-shape used in the transmitter. 
@@ -72,7 +72,7 @@ for snr_point = 1:length(EbN0_db)
     n = sqrt(sigma_sqr/2)*(randn(size(tx))+1i*randn(size(tx)));
 
     % Received signal.
-    rx = tx + n;
+    rx = tx; %+ n;
     %drx = dtx + n;
 
     %%%
@@ -129,6 +129,7 @@ BER = nr_errors / nr_data_bits / nr_blocks;
 
 plot(EbN0_db,BER, 'LineWidth', 2); hold on;
 %plot(EbN0_db,dBER, 'LineWidth', 2);
+plot(EbN0_db,1-normcdf(sqrt(2*10.^(EbN0_db/10))), 'LineWidth', 2);
 set(gca, 'YScale', 'log')
 xlabel('Eb/N0 (dB)')
 ylabel('BER (dB)')

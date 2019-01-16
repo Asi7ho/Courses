@@ -6,7 +6,7 @@ function d = dqpsk(b)
     d(1) = QPSK(1);
     
     for i = 2:N
-       d(i) = QPSK(i)*QPSK(i-1);
+       d(i) = QPSK(i)*conj(QPSK(i-1));
     end
 
 end

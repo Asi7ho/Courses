@@ -32,6 +32,7 @@ mf_pulse_shape = fliplr(pulse_shape);
 % Loop over different values of Eb/No.
 nr_errors = zeros(1, length(EbN0_db));   % Error counter
 for snr_point = 1:length(EbN0_db)
+    phase_shift = 0;
   
   % Loop over several blocks to get sufficient statistics.
   for blk = 1:nr_blocks
@@ -57,6 +58,10 @@ for snr_point = 1:length(EbN0_db)
 
     % Upsample the signal, apply pulse shaping.
     tx = upfirdn(d, pulse_shape, Q, 1);
+    
+    phase_shift = (pi/4)*rand(1, 1);
+    
+    tx = tx.*phase_shift;
 
     %%%
     %%% AWGN Channel
@@ -70,14 +75,12 @@ for snr_point = 1:length(EbN0_db)
 
     % Received signal.
     rx = tx + n;
-    y = multipath(tx, length(mf_pulse_shape) - 1) + n;
 
     %%%
     %%% Receiver
     %%%
     
     % Matched filtering.
-    mf=conv(mf_pulse_shape,rx);
     mf=conv(mf_pulse_shape,rx);
     
     % Synchronization. The position and size of the search window
@@ -86,14 +89,14 @@ for snr_point = 1:length(EbN0_db)
     % function used for syncing)! 
     t_start=1+Q*nr_guard_bits/2;
     t_end=t_start+50;
-    t_samp = sync(mf, b_train, Q, t_start, t_end);
+    t_samp = t_start + length(mf_pulse_shape) - 1;
     
     % Down sampling. t_samp is the first sample, the remaining samples are all
     % separated by a factor of Q. Only training+data samples are kept.
     r = mf(t_samp:Q:t_samp+Q*(nr_training_bits+nr_data_bits)/2-1);
 
     % Phase estimation and correction.
-    phihat = phase_estimation(r, b_train);
+    phihat = 0;
     r = r * exp(-1i*phihat);
         
     % Make decisions. Note that dhat will include training sequence bits
@@ -104,8 +107,8 @@ for snr_point = 1:length(EbN0_db)
     % are included in the comparison. The last data bits are missing as well
     % since the whole impulse response due to the last symbol is not
     % included in the simulation program above.
-    temp=bhat(1+nr_training_bits:nr_training_bits+nr_data_bits) ~= b_data;
-    nr_errors(snr_point) = nr_errors(snr_point) + sum(temp);
+    temp{snr_point, blk}=bhat(1+nr_training_bits:nr_training_bits+nr_data_bits) ~= b_data;
+    nr_errors(snr_point) = nr_errors(snr_point) + sum(temp{snr_point, blk});
 
     % Next block.
   end
@@ -116,15 +119,28 @@ end
 % Compute the BER. 
 BER = nr_errors / nr_data_bits / nr_blocks;
 
+for j = 1:11 
+    for i = 1:50 
+        MAX(j, i) = sum(temp{j, i});
+    end
+end
+
+
+for i = 1:11
+    maxInBlk = 0;
+    for j = 1:50
+        if maxInBlk < MAX(i, j)
+            maxInBlk = MAX(i, j);
+            index = j;
+        end
+    end
+    maxTAB(i) = index;
+end
+
+
 plot(EbN0_db,BER, 'LineWidth', 2); hold on;
 plot(EbN0_db,1-normcdf(sqrt(2*10.^(EbN0_db/10))), 'LineWidth', 2);
 set(gca, 'YScale', 'log')
 xlabel('Eb/N0 (dB)')
 ylabel('BER (dB)')
 legend('BER simulation',  'BER theory')
-
-%% Eye diagram
-
-eyediagram(rx, 64)
-
-eyediagram(y, 64)

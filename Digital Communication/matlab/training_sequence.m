@@ -17,8 +17,8 @@ function b = training_sequence(nr_training_bits)
 
 %b = (rand(1, nr_training_bits) > .5);
 
-b = ones(1, nr_training_bits);
-b = qmf(b);
-%b(1) = 1;
+b = zeros(1, nr_training_bits);
+b(1) = 1;
+b(2) = 1;
 
 end
