@@ -1,0 +1,50 @@
+//
+//  f_image.c
+//  Projet programmation
+//
+//  Created by Yann Debain on 01/01/2017.
+//  Copyright © 2017 Yann Debain. All rights reserved.
+//
+
+#include <stdio.h>
+#include <stdlib.h>
+#include "f_image.h"
+
+void libere_image(unsigned char ** p_image)
+{
+
+    free(*p_image);
+    free(p_image);
+
+}
+
+
+unsigned char** alloue_image(int nbl, int nbc)
+{
+
+    unsigned char **p = NULL;
+    int i = 0;
+
+    p = (unsigned char **)calloc(nbl, sizeof(*p));
+
+    if (p == NULL) {
+        printf("impossible d'allouer de la memoire pour l'image");
+        return NULL;
+    }
+    else {
+        *p = (unsigned char*)calloc(nbl*nbc, sizeof(**p));
+        if (*p == NULL) {
+            free(p)
+            return NULL;
+        }
+        else {
+            for(i = 1; i < nbl; i++)
+            {
+                p[i] = p[i-1] + nbc;
+            }
+        }
+    }
+
+    return p;
+
+}

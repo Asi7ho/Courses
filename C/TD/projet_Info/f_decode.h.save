@@ -1,0 +1,47 @@
+//
+//  f_decode.h
+//  Projet programmation
+//
+//  Created by Yann Debain on 01/01/2017.
+//  Copyright © 2017 Yann Debain. All rights reserved.
+//
+
+#ifndef f_decode_h
+#define f_decode_h
+
+
+/*
+ * Extrait un octet cache dans l’image img, en demarrant au pixel « *p_k » * Cette fonction retourne l’octet du message qui est cache dans les
+ * pixels *p_k , *p_k+1, *p_k+2, *p_k+3), etc.
+ * selon le nombre de bits bitParPixel caches dans un pixel.
+ * *p_k est incremente pour referencer le prochain pixel à analyser
+ * PARAMETRES :
+ * img : l’image dans laquelle l’octet est cache.
+ * p_k : pointeur vers la pixel a partir duquel on commence à extraire.
+ *p_k est incremente par la fonction. Avec 2 bits par pixel
+ *p_k sera augmente de 4
+ * bitParPixel : nombre de bits de poids faible utilise
+ pour cacher le message dans chaque pixel * RETOUR : la valeur reconstruite.
+ */
+unsigned char extraitunoctet (unsigned char **img, int *p_k, char bitParPixel) ;
+
+
+
+
+/*
+ * Extrait le fichier cache dans l’image « img », à raison de « bitParPixel » bits caches dans un pixel, et recree le fichier qui contenait le message. Cette fonction commence par extraire de l’image le nom du fichier cache, puis recree pas a pas ce fichier a l’identique en extrayant son contenu cache dans l’image.
+ * PARAMETRES :
+ * img : l’image dans laquelle est caché le fichier.
+ * bitParPixel : nombre de bits de poids faible utilise pour cacher le message dans chaque pixel
+ * nl : nombre de lignes de l’image
+ * nc : nombre de colonnes de l’image
+ * RETOUR : 0 en l’absence d’erreur, -1 en cas d’erreur.
+ */
+ int imdecode (unsigned char** img, char bitParPixel, int nl, int nc) ;
+ 
+ int ouvreImage(unsigned char **p , char nomImage[],int *nc,int *nl);
+ 
+/*ouvre l'image et la met dans la ram , ppointe sur la premiere case du tableau 
+renvoie 0 si l'ouverture s'est bien passee*/
+
+#endif /* f_decode_h */

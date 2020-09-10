@@ -1,0 +1,67 @@
+# depslib dependency file v1.0
+1484316715 source:c:\users\antoine\compo\programmes\didact\projet_info\main.c
+	<stdio.h>
+	<stdlib.h>
+	"f_image.h"
+	"f_decode.h"
+	"f_code.h"
+
+1483816581 c:\users\antoine\compo\programmes\didact\projet_info\f_image.h
+
+1484152677 c:\users\antoine\compo\programmes\didact\projet_info\f_decode.h
+
+1483822212 c:\users\antoine\compo\programmes\didact\projet_info\f_code.h
+
+1484316775 source:c:\users\antoine\compo\programmes\didact\projet_info\f_image.c
+	<stdio.h>
+	<stdlib.h>
+	"f_image.h"
+
+1484159697 source:c:\users\antoine\compo\programmes\didact\projet_info\f_decode.c
+	"f_decode.h"
+	<stdio.h>
+	<stdlib.h>
+	<math.h>
+	"f_code.h"
+
+1483821816 c:\users\antoine\compo\programmes\didact\projet_info\f_code.c
+	<stdio.h>
+	<stdlib.h>
+	"f_code.h"
+
+1484316715 source:c:\users\antoine\compo\programmes\didact\projet_info\f_code.c
+	<stdio.h>
+	<stdlib.h>
+	"f_code.h"
+
+1484325378 source:e:\projet_info\f_decode.c
+	"f_decode.h"
+	<stdio.h>
+	<stdlib.h>
+	<math.h>
+	"f_code.h"
+	"f_image.h"
+
+1484324214 e:\projet_info\f_decode.h
+
+1483822214 e:\projet_info\f_code.h
+
+1483816582 e:\projet_info\f_image.h
+
+1484316776 source:e:\projet_info\f_image.c
+	<stdio.h>
+	<stdlib.h>
+	"f_image.h"
+
+1484325848 source:e:\projet_info\main.c
+	<stdio.h>
+	<stdlib.h>
+	"f_image.h"
+	"f_decode.h"
+	"f_code.h"
+
+1484320320 source:e:\projet_info\f_code.c
+	<stdio.h>
+	<stdlib.h>
+	"f_code.h"
+
