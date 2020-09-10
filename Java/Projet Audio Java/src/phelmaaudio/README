@@ -1,0 +1,10 @@
+La classe essentielle de ce package est la classe
+    AudioData
+
+Le code des la classe AudioData est raisonnablement correct.
+
+
+Toutes les autres classes sont des classes utilitaires.
+Le code de toutes les autres classes a été écrit approche extrêmement rapidement (approche "code and fix") .
+Il n’est pas conseillé de lire le code de ces autres classes, qui laisse à désirer en terme de POO.
+On fera mieux l’année prochaine !
